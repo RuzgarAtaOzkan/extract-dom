@@ -1,15 +1,14 @@
 'use strict';
 
-// MODULES
-const axios = require('axios');
-
-async function extract(url, identifier) {
+function extractDom(data, identifier) {
   const elements = [
+    // supported html elements to be extracted
     'h1',
     'h2',
     'h3',
     'h4',
     'h5',
+    'a',
     'img',
     'div',
     'li',
@@ -19,7 +18,16 @@ async function extract(url, identifier) {
     'span',
   ];
 
-  const props = ['id', 'class', 'src', 'alt', 'type', 'title'];
+  const props = [
+    'id',
+    'class',
+    'src',
+    'alt',
+    'type',
+    'title',
+    'href',
+    'loading',
+  ];
 
   const parts = identifier.split('.');
 
@@ -28,7 +36,6 @@ async function extract(url, identifier) {
   const value = parts[1].split('=')[1];
 
   const result = [];
-  let data = '';
 
   if (!value) {
     return null;
@@ -42,26 +49,8 @@ async function extract(url, identifier) {
     return null;
   }
 
-  if (url.startsWith('http')) {
-    const res = await axios.get(url);
-    data = res.data;
-  }
-
-  //console.log(data);
-
-  /**
-   * 
-   *   if (!data.startsWith('<!DOCTYPE html>')) {
-    return null;
-  }
-
-   * 
-   */
-
-  console.log('\n====================================\n');
-
   // continue if current index and rest is not the element that user provided
-  let query = '<' + element;
+  let query = '<' + element + ' ';
   for (let i = 0; i < data.length; i++) {
     let read = '';
 
@@ -92,8 +81,6 @@ async function extract(url, identifier) {
 
       ctr++;
     }
-
-    //console.log(read);
 
     // extract element props
     const element_obj = { innerHTML: '' };
@@ -145,15 +132,4 @@ async function extract(url, identifier) {
   return final;
 }
 
-async function init() {
-  const elements = await extract(
-    'https://shop.mango.com/tr/erkek/h%C4%B1rka-ve-kazak-yelek/100-merinos-yunlu-yelek_57094761.html',
-    'span.class=banners__title'
-  );
-
-  console.log(elements);
-}
-
-init();
-
-module.exports = extract;
+module.exports = extractDom;
